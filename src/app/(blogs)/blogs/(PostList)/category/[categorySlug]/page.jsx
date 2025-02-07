@@ -1,17 +1,19 @@
 import { getPosts } from "@/services/postService";
-import { toPersianDigits } from "@/utils/numberFormatter";
+import setCookieOnReq from "@/utils/setCookieOnReq";
+import PostList from "app/(blogs)/blogs/_components/PostList";
+import { cookies } from "next/headers";
 import queryString from "query-string";
 
-const { default: PostList } = require("app/(blogs)/blogs/_components/PostList");
 
-async function Category({ params }) {
+async function Category({ params,searchParams }) {
   // console.log(params)
   const { categorySlug } = await params;
+  const queries = queryString.stringify(searchParams) + "&" + `categorySlug=${categorySlug}`
 
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/post/list?categorySlug=${categorySlug}`);
-  const { data } = await res.json();
-  const { posts } = data || {};
+    const cookieStore = cookies();
+    const options = setCookieOnReq(cookieStore);
+    const posts = await getPosts(queries,options);
+  
 
 
 
