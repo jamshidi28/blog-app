@@ -1,14 +1,17 @@
+import { fetchCardData } from "@/services/data";
+import { Card } from "./components/Card";
 
 
 async function Profile() {
+ const{numberOfComments,numberOfPosts,numberOfUsers}= await fetchCardData();
+
   return (
     <div>
-      <h1 className="text-xl mb-8 text-secondary-500">داشبورد</h1>
-      
-      <div>
-        <h1 className="text-xl mb-4 text-secondary-500">آخرین پست ها</h1>
-       
-      </div>
+     <div className="grid gap-6 md:grid-cols-3 mb-8">
+     <Card type="posts" title="پست ها" value={numberOfPosts}/>
+     <Card type="users" title="کاربران"value={numberOfUsers} />
+     <Card type="comments" title="نظرات" value={numberOfComments}/>
+     </div>
     </div>
   );
 }
