@@ -124,6 +124,7 @@
     border: 5px solid rgb(var(--color-primary-900));
     border-right-color: rgb(var(--color-primary-200));
     animation: rotate 1s infinite linear;
+    margin: 0 auto;
   }
 
   .spinner-mini {
