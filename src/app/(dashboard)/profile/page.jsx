@@ -1,4 +1,3 @@
-import PostTable from "./posts/_/componets/PostTable";
 import { Suspense } from "react";
 import CardsWrapper from "./components/CardsWrapper";
 import Fallback from "@/ui/Fallback";

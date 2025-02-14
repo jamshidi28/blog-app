@@ -7,10 +7,15 @@ function TextField({
   onChange,
   isRequired,
   className,
+  errors,
+  validationSchema = {},
+  ...rest
 }) {
+  const errorMessages = errors?.[name];
+  const hasError = !!(errors && errorMessages);
   return (
-    <div className="textField">
-      <label htmlFor={name} className="text-secondary-600 text-sm">
+    <div >
+      <label htmlFor={name} className="mb-2 block text-secondary-700">
         {label}
         {isRequired && <span className="text-error">*</span>}
       </label>
@@ -19,12 +24,16 @@ function TextField({
         name={name}
         id={name}
         dir={dir}
-        className={`textField textField__valid ${
-          dir === "ltr" ? "text-left" : "text-right"
-        } ${className}`}
+        className={`textField__input ${dir === "ltr" ? "text-left" : "text-right"
+          } ${className}`}
         value={value}
         onChange={onChange}
       />
+      {errors && errors[name] && (
+        <span className="text-red-600 block text-xs mt-2">
+          {errors[name]?.message}
+        </span>
+      )}
     </div>
   );
 }

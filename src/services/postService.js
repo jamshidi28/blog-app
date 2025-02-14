@@ -41,3 +41,7 @@ export async function bookmarkPostApi(postId) {
     data
   }) => data.data);
 }
+
+export async function creatPostApi (data){
+ return http.post("/post/create",data).then(({data}) => data.data)
+}
