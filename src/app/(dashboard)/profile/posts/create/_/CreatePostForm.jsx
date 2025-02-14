@@ -9,12 +9,14 @@ import TextField from "@/ui/TextField";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form"
 import * as yup from "yup";
 import useCreatePost from "./useCreatePost";
 import { SpinnerMini } from "@/ui/Spinner";
 import { useRouter } from "next/navigation";
+import useEditPost from "./useEditPost";
+import { imageUrlToFile } from "@/utils/fileFormatter";
 
 
 const schema = yup
@@ -42,26 +44,75 @@ const schema = yup
     })
     .required();
 
-function CreatePostForm() {
-   const router = useRouter();
-   const{creatPost,isCreating}= useCreatePost()
-    const [coverImageUrl, setCoverImageUrl] = useState(null)
+function CreatePostForm({ postToEdit = {} }) {
+    const { _id: editId } = postToEdit;
+    const isEditSession = Boolean(editId)
+    console.log(postToEdit)
+    const {
+        title,
+        briefText,
+        slug,
+        readingTime,
+        text,
+        category,
+        coverImage,
+        coverImageUrl: prevCoverImageUrl,
+    } = postToEdit;
+
+    let editValues = {}
+    if (isEditSession) {
+        editValues = {
+            title,
+            briefText,
+            slug,
+            readingTime,
+            text,
+            category: category._id,
+            coverImage,
+        }
+    };
+    const router = useRouter();
+    const { creatPost, isCreating } = useCreatePost();
+    const [coverImageUrl, setCoverImageUrl] = useState(prevCoverImageUrl||null);
     const { categories } = useCategories();
-    const { register, formState: { errors }, handleSubmit, reset, control, setValue } = useForm({
+    const { editPost, isEditing } = useEditPost();
+    const { register, formState: { errors }, handleSubmit, control, setValue } = useForm({
         mode: "onTouched",
-        resolver: yupResolver(schema)
+        resolver: yupResolver(schema),
+        defaultValues: editValues,
     });
+
+    useEffect(()=>{
+        if(prevCoverImageUrl){
+           async function fetchMyApi() {
+            const file =  await imageUrlToFile(prevCoverImageUrl);
+               setValue("coverImage",file)
+            }
+            fetchMyApi();
+        }
+    },[editId]);
 
     const onSubmit = (data) => {
         const formData = new FormData();
-        for (const key in data){
-            formData.append(key,data[key])
+        for (const key in data) {
+            formData.append(key, data[key])
         }
-        creatPost(formData,{
-            onSuccess:()=>{
-                router.push("/profile/posts")
-            }
-        });
+        
+        if (isEditSession) {
+            editPost(
+                {id:editId , data:formData},
+
+                {onSuccess:()=>{
+                    router.push("/profile/posts")
+                }
+            })
+        }else {
+            creatPost(formData, {
+                onSuccess: () => {
+                    router.push("/profile/posts")
+                }
+            });
+        }
     }
     return (
         <form className="form" onSubmit={handleSubmit(onSubmit)}>
@@ -156,13 +207,13 @@ function CreatePostForm() {
                 </div>)
             }
 
-           <div>
-            {
-                isCreating ? <SpinnerMini/> :  <Button variant="primary" type="submit" className="w-full">
-                تایید
-            </Button>
-            }
-           </div>
+            <div>
+                {
+                    isCreating ? <SpinnerMini /> : <Button variant="primary" type="submit" className="w-full">
+                        تایید
+                    </Button>
+                }
+            </div>
         </form>
     )
 }
